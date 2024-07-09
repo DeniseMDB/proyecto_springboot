@@ -1,5 +1,6 @@
 package com.clienteApiRest.clienteApiRest.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -8,9 +9,11 @@ import java.util.List;
 @Entity
 @Table (name ="clients")
 @Data
+@JsonIgnoreProperties({"carts"})
 public class Client {
 
     @Id
+    //@Column(name ="client_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

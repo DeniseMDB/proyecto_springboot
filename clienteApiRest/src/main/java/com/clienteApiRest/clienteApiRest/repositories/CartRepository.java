@@ -13,4 +13,7 @@ import java.util.Optional;
 public interface CartRepository extends CrudRepository <Cart, Long> {
     @Query(nativeQuery = true, value = "SELECT * FROM carts WHERE carts.client_id = :clientId")
     List<Cart> findByClientId(@Param("clientId") Long clientid);
+    @Query(nativeQuery = true, value = "SELECT * FROM carts WHERE carts.client_id = :clientId AND carts.product_id = :productId")
+    Optional<Cart> findByClientIdAndProductId(@Param("clientId") Long clientId, @Param("productId") Long productId);
+
 }

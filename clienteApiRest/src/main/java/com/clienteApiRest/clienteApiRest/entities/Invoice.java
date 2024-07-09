@@ -18,7 +18,7 @@ public class Invoice {
 
     @ManyToOne
     @JoinColumn (name ="client_id")
-    private Client clientId;
+    private Client client;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

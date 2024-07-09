@@ -7,6 +7,7 @@ import com.clienteApiRest.clienteApiRest.repositories.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -36,8 +37,21 @@ public class CartService {
         }
     }
 
+    public Long findByClientIdAndProductId(Long clientId, Long productId){
+        Optional<Cart> opCart = cartRepository.findByClientIdAndProductId(clientId,productId);
+        return opCart.get().getId();
+
+    }
+
     public void deleteCart(Long id){
         cartRepository.deleteById(id);
+    }
+
+    public List<Cart> findAllCarts(){
+        return (List<Cart>) cartRepository.findAll();
+    }
+    public Optional<Cart> readOne(Long id){
+        return cartRepository.findById(id);
     }
 
     public Cart addProduct(Long idClient, Long idProduct, Integer amount){
@@ -51,15 +65,39 @@ public class CartService {
             Cart cart;
             if (cartList.isEmpty()){
                 cart = new Cart();
-            }else{
-                cart = findByClientId(client.getId()).get(0);
+                cart.setPrice(0.0);
+                cart.setAmount(0);
+                cart.setProducts(new ArrayList<>());
+                cart.setClient(client);
+            } else {
+                cart = cartList.get(0);
             }
-            cart.setProductId(product);
-            cart.setClientId(client);
-            cart.setAmount(cart.getAmount() + amount);
-            cart.setPrice(product.getPrice() * cart.getAmount());
-
-            return cartRepository.save(cart);
-
+        cart.getProducts().add(product);
+        cart.setPrice(cart.getPrice() + (product.getPrice() * amount));
+        cart.setAmount(amount);
+        return cartRepository.save(cart);
     }
+
+    public Cart removeProduct(Long idClient, Long idProduct){
+        Optional<Client> optClient = clientService.readOne(idClient);
+        Optional<Product> optProduct = productService.readOne(idProduct);
+
+        if (optClient.isPresent() && optProduct.isPresent()) {
+            Client client = optClient.get();
+            Product product = optProduct.get();
+            List<Cart> cartList = findByClientId(client.getId());
+            if (!cartList.isEmpty()) {
+                Cart cart = cartList.get(0);
+                List<Product> products = cart.getProducts();
+                if (products.remove(product)) {
+                    cart.setProducts(products);
+                    cart.setPrice(cart.getPrice() - product.getPrice());
+                    return cartRepository.save(cart);
+                }
+            }
+        }
+        throw new RuntimeException("Product or Client not found in cart");
+    }
+
+
 }

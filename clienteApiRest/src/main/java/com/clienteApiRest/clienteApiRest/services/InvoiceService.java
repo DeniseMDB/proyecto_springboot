@@ -23,6 +23,10 @@ public class InvoiceService {
         return repository.findById(id);
     }
 
+    public Optional<List<Invoice>> findByClientId(Long clientId){
+        return repository.findInvoicesByClientId(clientId);
+    }
+
     public void deleteInvoice(Long id){
         repository.deleteById(id);
     }
