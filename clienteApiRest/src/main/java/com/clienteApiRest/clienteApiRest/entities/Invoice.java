@@ -1,5 +1,6 @@
 package com.clienteApiRest.clienteApiRest.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.CustomLog;
 import lombok.Data;
@@ -18,6 +19,7 @@ public class Invoice {
 
     @ManyToOne
     @JoinColumn (name ="client_id")
+    @JsonIgnoreProperties({"invoices", "carts"}) // Evitar bucles infinitos en la serialización
     private Client client;
 
     @Column(name = "created_at")

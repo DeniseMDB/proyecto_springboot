@@ -10,7 +10,7 @@ import java.util.List;
 @Entity
 @Table(name = "products")
 @Data
-@JsonIgnoreProperties({"carts"})
+@JsonIgnoreProperties({"carts"}) //para evitar recursion infinita
 public class Product {
     @Id
     @Column(name="product_id")
