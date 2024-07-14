@@ -29,4 +29,12 @@ public class ProductService {
     public void deleteProduct(Long id){
         productRepository.deleteById(id);
     }
+
+    public void subtractStock(Long id, Integer amount){
+        productRepository.decrementStock(id, amount);
+    }
+
+    public void addStock(Long id, Integer amount){
+        productRepository.incrementStock(id, amount);
+    }
 }

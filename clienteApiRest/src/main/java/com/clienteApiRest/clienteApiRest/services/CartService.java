@@ -54,28 +54,38 @@ public class CartService {
         return cartRepository.findById(id);
     }
 
-    public Cart addProduct(Long idClient, Long idProduct, Integer amount){
+    public Cart addProduct(Long idClient, Long idProduct, Integer amount) {
         Optional<Client> optClient = clientService.readOne(idClient);
         Optional<Product> optProduct = productService.readOne(idProduct);
-
-
+        //se revisa que exista cliente y producto
+        if (optClient.isPresent() && optProduct.isPresent()) {
             Client client = optClient.get();
             Product product = optProduct.get();
-            List <Cart> cartList= findByClientId(client.getId());
-            Cart cart;
-            if (cartList.isEmpty()){
-                cart = new Cart();
-                cart.setPrice(0.0);
-                cart.setAmount(0);
-                cart.setProducts(new ArrayList<>());
-                cart.setClient(client);
+            //se revisa que la cantidad de producto a ingresar sea menor que el stock del mismo
+            if (product.getStock() >= amount) {
+                List<Cart> cartList = findByClientId(client.getId());
+                Cart cart;
+                if (cartList.isEmpty()) {
+                    cart = new Cart();
+                    cart.setPrice(0.0);
+                    cart.setAmount(0);
+                    cart.setProducts(new ArrayList<>());
+                    cart.setClient(client);
+                } else {
+                    cart = cartList.get(0);
+                }
+                cart.getProducts().add(product);
+                cart.setPrice(cart.getPrice() + (product.getPrice() * amount));
+                cart.setAmount(cart.getAmount() + amount);
+                productService.subtractStock(idProduct, amount);
+                return cartRepository.save(cart);
+
             } else {
-                cart = cartList.get(0);
+                throw new RuntimeException("Stock insuficiente para el producto");
             }
-        cart.getProducts().add(product);
-        cart.setPrice(cart.getPrice() + (product.getPrice() * amount));
-        cart.setAmount(amount);
-        return cartRepository.save(cart);
+        } else {
+            throw new RuntimeException("Cliente o producto no encontrado");
+        }
     }
 
     public Cart removeProduct(Long idClient, Long idProduct){
