@@ -1,8 +1,11 @@
 package com.clienteApiRest.clienteApiRest.controllers;
 
-
 import com.clienteApiRest.clienteApiRest.entities.Client;
 import com.clienteApiRest.clienteApiRest.services.ClientService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,12 +17,18 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("api/clients")
+@Tag(name = "Client", description = "Api for Client requests")
 public class ClientController {
 
     @Autowired
     private ClientService service;
 
     @PostMapping
+    @Operation(summary = "Create a new client", description = "Creates a new client in the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Client created successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<Client> createClient(@RequestBody Client client){
         try{
             return new ResponseEntity<>(service.save((client)), HttpStatus.CREATED);
@@ -30,6 +39,12 @@ public class ClientController {
     }
 
     @GetMapping
+    @Operation(summary = "Get all clients", description = "Retrieves all clients from the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Clients retrieved successfully"),
+            @ApiResponse(responseCode = "204", description = "No content"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<List<Client>> getAllClients(){
         try{
             List<Client> clients = service.read();
@@ -45,6 +60,12 @@ public class ClientController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get client by ID", description = "Retrieves a client by their ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Client retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Client not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<Object> getClientById(@PathVariable Long id){
         try{
             Optional<Client> client = service.readOne(id);
@@ -60,6 +81,12 @@ public class ClientController {
     }
 
     @PatchMapping("/{id}")
+    @Operation(summary = "Update client", description = "Updates the details of an existing client")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Client updated successfully"),
+            @ApiResponse(responseCode = "404", description = "Client not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<Client> updateClient(@PathVariable Long id, @RequestBody Client data) {
         try {
             Optional<Client> optionalClient = service.readOne(id);
@@ -79,6 +106,12 @@ public class ClientController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete client", description = "Deletes a client by their ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Client deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Client not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<Map<String, Boolean>> deleteClient(@PathVariable Long id) {
         try {
             Optional<Client> optionalClient = service.readOne(id);
