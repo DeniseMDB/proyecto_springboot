@@ -30,4 +30,8 @@ public class Invoice {
 
     @Schema(description = "Total amount of the invoice", example = "250.75", required = true)
     private Double total;
+
+    @Enumerated(EnumType.STRING)
+    @Schema(description = "Payment method used for the invoice", example = "CREDIT_CARD", required = true)
+    private PaymentMethod paymentMethod;
 }

@@ -60,17 +60,8 @@ public class CartController {
         }
     }
 
-    @GetMapping
-    @Operation(summary = "Find cart by client ID", description = "Finds the cart associated with a specific client ID",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Request body to find cart by client ID (insert in Payload)",
-                    required = true,
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"clientId\": 1}")
-                    )
-            )
-    )
+    @GetMapping("/{id}")
+    @Operation(summary = "Find cart by client ID", description = "Finds the cart associated with a specific client ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Cart found",
                     content = @Content(mediaType = "application/json",
@@ -82,10 +73,9 @@ public class CartController {
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Internal Server Error\"}")))
     })
-    public ResponseEntity<List<Cart>> findCartByClientId(@RequestBody Map<String, Object> payload) {
-        Long clientId = Long.parseLong(payload.get("clientId").toString());
+    public ResponseEntity<List<Cart>> findCartByClientId(@PathVariable Long id) {
         try {
-            List<Cart> carts = cartService.findByClientId(clientId);
+            List<Cart> carts = cartService.findByClientId(id);
             if (!carts.isEmpty()) {
                 return ResponseEntity.ok(carts);
             } else {

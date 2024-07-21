@@ -28,7 +28,17 @@ public class InvoiceController {
     private InvoiceService invoiceService;
 
     @PostMapping("/client/{clientId}")
-    @Operation(summary = "Create a new invoice", description = "Creates a new invoice for a specified client")
+    @Operation(summary = "Create a new invoice", description = "Creates a new invoice for a specified client",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Request body to create a new invoice, values can be CREDIT, DEBIT, CASH",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Invoice.class),
+                            examples = @ExampleObject(value = "{\"paymentMethod\": \"CREDIT\"}")
+                    )
+            )
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Invoice created successfully",
                     content = @Content(mediaType = "application/json",
@@ -37,9 +47,9 @@ public class InvoiceController {
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Internal Server Error\"}")))
     })
-    public ResponseEntity<Invoice> createInvoice(@PathVariable Long clientId) {
+    public ResponseEntity<Invoice> createInvoice(@PathVariable Long clientId,@RequestBody Map<String, Object> paymentMethod) {
         try {
-            Invoice invoice = invoiceService.saveByClientId(clientId);
+            Invoice invoice = invoiceService.saveByClientId(clientId, (String) paymentMethod.get("paymentMethod"));
             return new ResponseEntity<>(invoice, HttpStatus.CREATED);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

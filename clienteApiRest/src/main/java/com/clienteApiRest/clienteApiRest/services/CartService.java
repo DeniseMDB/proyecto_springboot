@@ -37,11 +37,11 @@ public class CartService {
         }
     }
 
-    public Long findByClientIdAndProductId(Long clientId, Long productId){
-        Optional<Cart> opCart = cartRepository.findByClientIdAndProductId(clientId,productId);
-        return opCart.get().getId();
-
-    }
+//    public Long findByClientIdAndProductId(Long clientId, Long productId){
+//        Optional<Cart> opCart = cartRepository.findByClientIdAndProductId(clientId,productId);
+//        return opCart.get().getId();
+//
+//    }
 
     public void deleteCart(Long id){
         cartRepository.deleteById(id);
@@ -57,23 +57,27 @@ public class CartService {
     public Cart addProduct(Long idClient, Long idProduct, Integer amount) {
         Optional<Client> optClient = clientService.readOne(idClient);
         Optional<Product> optProduct = productService.readOne(idProduct);
-        //se revisa que exista cliente y producto
+
         if (optClient.isPresent() && optProduct.isPresent()) {
             Client client = optClient.get();
             Product product = optProduct.get();
-            //se revisa que la cantidad de producto a ingresar sea menor que el stock del mismo
+
             if (product.getStock() >= amount) {
-                List<Cart> cartList = findByClientId(client.getId());
+                // busca un carrito no entregado para el cliente
+                Optional<Cart> optionalCart = cartRepository.findByClientIdAndDelivered(client.getId(), false);
                 Cart cart;
-                if (cartList.isEmpty()) {
+                if (optionalCart.isPresent()) {
+                    cart = optionalCart.get();
+                } else {
+                    // si no se encuentra un carrito no entregado, se crea uno nuevo
                     cart = new Cart();
                     cart.setPrice(0.0);
                     cart.setAmount(0);
                     cart.setProducts(new ArrayList<>());
                     cart.setClient(client);
-                } else {
-                    cart = cartList.get(0);
+                    cart.setDelivered(false);
                 }
+                // agrega el producto al carrito y actualiza el precio y la cantidad
                 cart.getProducts().add(product);
                 cart.setPrice(cart.getPrice() + (product.getPrice() * amount));
                 cart.setAmount(cart.getAmount() + amount);
@@ -88,26 +92,37 @@ public class CartService {
         }
     }
 
-    public Cart removeProduct(Long idClient, Long idProduct){
+    public Cart removeProduct(Long idClient, Long idProduct) {
         Optional<Client> optClient = clientService.readOne(idClient);
         Optional<Product> optProduct = productService.readOne(idProduct);
 
         if (optClient.isPresent() && optProduct.isPresent()) {
             Client client = optClient.get();
             Product product = optProduct.get();
-            List<Cart> cartList = findByClientId(client.getId());
-            if (!cartList.isEmpty()) {
-                Cart cart = cartList.get(0);
+            Optional<Cart> optionalCart = cartRepository.findByClientIdAndDelivered(client.getId(), false);
+            if (optionalCart.isPresent()) {
+                Cart cart = optionalCart.get();
                 List<Product> products = cart.getProducts();
-                if (products.remove(product)) {
-                    cart.setProducts(products);
-                    cart.setPrice(cart.getPrice() - product.getPrice());
-                    return cartRepository.save(cart);
+                boolean productFound = false;
+                for (Product p : products) {
+                    if (p.getId().equals(idProduct)) {
+                        productFound = true;
+                        products.remove(p);
+                        cart.setProducts(products);
+                        cart.setPrice(cart.getPrice() - product.getPrice());
+                        cart.setAmount(cart.getAmount() - 1);
+                        productService.addStock(idProduct, 1);
+                        return cartRepository.save(cart);
+                    }
                 }
+                if (!productFound) {
+                    throw new RuntimeException("Producto no encontrado en el carrito");
+                }
+            } else {
+                throw new RuntimeException("Carrito no encontrado para el cliente");
             }
+        } else {
+            throw new RuntimeException("Cliente o producto no encontrado");
         }
-        throw new RuntimeException("Product or Client not found in cart");
-    }
-
-
+        throw new RuntimeException("Error desconocido al eliminar producto del carrito");}
 }

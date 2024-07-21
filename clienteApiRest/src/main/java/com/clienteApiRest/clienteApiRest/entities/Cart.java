@@ -36,4 +36,7 @@ public class Cart {
     )
     @Schema(description = "List of products in the cart")
     private List<Product> products;
+
+    @Schema(description = "Turned true once the client pays and receives his purchase", example = "true", required = false)
+    private Boolean delivered;
 }
