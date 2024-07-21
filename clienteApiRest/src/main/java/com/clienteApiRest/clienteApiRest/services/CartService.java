@@ -37,12 +37,6 @@ public class CartService {
         }
     }
 
-//    public Long findByClientIdAndProductId(Long clientId, Long productId){
-//        Optional<Cart> opCart = cartRepository.findByClientIdAndProductId(clientId,productId);
-//        return opCart.get().getId();
-//
-//    }
-
     public void deleteCart(Long id){
         cartRepository.deleteById(id);
     }
