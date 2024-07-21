@@ -18,16 +18,22 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(description = "Unique client identifier", example = "1", required = false)
     private Long id;
+
     @Schema(description = "Client's name", example = "Mario", required = true)
     private String name;
+
     @Schema(description = "Client's lastname", example = "Perez", required = true)
     private String lastName;
+
     @Schema(description = "Client's docnumber", example = "24567498", required = true)
     private Integer docnumber;
 
+    @Schema(description = "Client's associated invoices", required = false)
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Invoice> invoices;
 
+    @Schema(description = "Client's associated carts", required = false)
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Cart> carts;
+
 }

@@ -13,10 +13,6 @@ public class ClientService {
     @Autowired
     private ClientRepository repository;
 
-    public Client save(Client client){
-        return repository.save(client);
-    }
-
     public List<Client> read(){
         return repository.findAll();
     }
@@ -27,6 +23,9 @@ public class ClientService {
 
     public void deleteClient(Long id){
         repository.deleteById(id);
+    }
+    public Client save(Client client){
+        return repository.save(client);
     }
 
 }
